@@ -15,6 +15,8 @@ import {
   TextChannel,
   ActivityType,
   EmbedBuilder,
+  Message,
+  MessageFlags,
 } from "discord.js";
 import "dotenv/config";
 
@@ -127,7 +129,7 @@ client.on("interactionCreate", async (interaction: Interaction) => {
 
     await interaction.reply({
       content: "✅ Your application has been submitted.",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 
@@ -137,7 +139,7 @@ client.on("interactionCreate", async (interaction: Interaction) => {
     if (interaction.user.id !== applicationAdminId) {
       await interaction.reply({
         content: `❗ Only the designated admin can process applications.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -146,7 +148,7 @@ client.on("interactionCreate", async (interaction: Interaction) => {
     if (!guild) {
       await interaction.reply({
         content: `❗ Guild not found.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -156,15 +158,20 @@ client.on("interactionCreate", async (interaction: Interaction) => {
     if (!user || !member) {
       await interaction.reply({
         content: `❗ User not found.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
     if (action === "accept") {
-      await user.send({
-        content: `✅ Your application has been accepted. Welcome to Surge!`,
-      });
+      try {
+        await user.send({
+          content: `✅ Your application has been accepted. Welcome to Surge!`,
+        });
+      } catch (error) {
+        console.log(error);
+        return;
+      }
 
       const surgeRoleId = "1370159531618996284";
 
@@ -173,15 +180,20 @@ client.on("interactionCreate", async (interaction: Interaction) => {
       });
       await interaction.reply({
         content: `✅ Accepted <@${userId}>'s application.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (action === "reject") {
-      await user.send({
-        content: `❌ Your application has been rejected. Please try again later.`,
-      });
+      await user
+        .send({
+          content: `❌ Your application has been rejected. Please try again later.`,
+        })
+        .catch((error) => {
+          console.log(error);
+          return;
+        });
       await interaction.reply({
         content: `❌ Rejected <@${userId}>'s application.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   }
